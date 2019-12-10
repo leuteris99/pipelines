@@ -48,7 +48,7 @@ int main(int argc, char **argv) {
         printf("the data is: %s\n", buf);
         printf("complete child!\n");
         char *args[]={"tr","\"[:lower:]\"","\"[:upper:]\""}; // TODO: fix the exec.
-        execv(args[0],args);
+        execl("/bin/ls","ls","-l",NULL);
         printf("the exec didn't work :(");
     } else{
         perror("fork error: ");
