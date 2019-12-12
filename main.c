@@ -34,25 +34,33 @@ int main(int argc, char **argv) {
             printf("Readied successful: %s\n", buf);
         }
 
-        dup2(p[1], STDOUT_FILENO); // post
         close(p[0]); //pre
+        dup2(p[1], STDOUT_FILENO); // post
         close(p[1]); //post
         //write(p[1], buf, strlen(buf) + 1); //pre
         close(fd);
         //printf("complete parent!\n");
         printf("%s",buf);
+        char toPrint[bufSize];
+        close(pa[1]);
+        dup2(pa[0],STDIN_FILENO);
+        close(pa[0]);
+        read(STDIN_FILENO,toPrint,bufSize + 1);
+        printf("i am your father");
+        printf("%s",toPrint);
     } else if (pid == 0) {
         //child
         printf("hi from child\n");
         printf("enter critical section child!\n");
 
-        dup2(p[0],STDIN_FILENO); // post
         close(p[1]); // pre
+        dup2(p[0],STDIN_FILENO); // post
         close(p[0]); //post
         //read(p[0], buf, bufSize); //pre
         printf("the data is: %s\n", buf);
         printf("complete child!\n");
         //char *args[]={"tr","\"[:lower:]\"","\"[:upper:]\""}; // TODO: fix the exec.
+
         execl("/usr/bin/tr","tr","[:lower:]","[:upper:]",NULL);
         //execl("/bin/ls","ls","-l",NULL);
         printf("the exec didn't work :(");
