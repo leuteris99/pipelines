@@ -42,12 +42,12 @@ int main(int argc, char **argv) {
         //printf("complete parent!\n");
         printf("%s",buf);
         char toPrint[bufSize];
-        close(pa[1]);
+       /* close(pa[1]);
         dup2(pa[0],STDIN_FILENO);
-        close(pa[0]);
-        read(STDIN_FILENO,toPrint,bufSize + 1);
-        printf("i am your father");
-        printf("%s",toPrint);
+        close(pa[0]);*/
+        read(STDIN_FILENO,toPrint,bufSize); // did i fixit it???
+        //printf("%s",toPrint);
+        return 0;
     } else if (pid == 0) {
         //child
         printf("hi from child\n");
