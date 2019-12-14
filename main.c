@@ -6,7 +6,7 @@
 
 /**
 @author Eleftherios Alexiou (P2017143)
-@uthor Nemanja Jevtić (P2017182)
+@author Nemanja Jevtić (P2017182)
 
 @since 14/12/2019
 
