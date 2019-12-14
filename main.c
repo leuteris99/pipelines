@@ -4,63 +4,62 @@
 #include <string.h>
 #include <fcntl.h>
 
+/**
+@author Eleftherios Alexiou (P2017143)
+@uthor Nemanja Jevtić (P2017182)
+
+@since 14/12/2019
+
+This code takes a file as an argument, it reads it and uses a pipe to run the tr
+shell command on a new process, replacing the lower case letters with upper case.
+Than it returns the output and print it to the parent process.
+*/
 int main(int argc, char **argv) {
-    pid_t pid;
-    int bufSize = 4096;
-    char buf[bufSize];
-    int p[2],pa[2];
+    pid_t pid; // pid to determine the current process
+    int bufSize = 4096; // buffer size
+    char buf[bufSize]; // buffer to store the data from the file
+    int p[2]; // pipe which sends data from the parent to the children.
 
-    if (pipe(p) < 0) {
-        perror("Pipe error: ");
-        return 1;
-    }
-    if (pipe(pa) < 0) {
+    if (pipe(p) < 0) { // create the pipeline
         perror("Pipe error: ");
         return 1;
     }
 
-    if ((pid = fork()) > 0) {
+    if ((pid = fork()) > 0) { // create the child process
         // parent
-        printf("hi from parent\n");
-        printf("enter critical section parent!\n");
-        int fd = open(argv[1], O_RDONLY);
+        int fd = open(argv[1], O_RDONLY); // opening the file
         if (fd < 0){
             perror("open file error: ");
             return 1;
         }
-        int a = read(fd, buf, bufSize);
-        printf("%d\n",a);
-        if (a > 0) {
-            printf("Readied successful: %s\n", buf);
-        }
+        int a = read(fd, buf, bufSize); // read from the file
+        printf("The file contains:\n");
+        /*if (a > 0) {
+            printf("Readied successful: %s\n", buf); // Debug
+        }*/
 
-        dup2(p[1], STDOUT_FILENO); // post
-        close(p[0]); //pre
-        close(p[1]); //post
-        //write(p[1], buf, strlen(buf) + 1); //pre
+        close(p[0]);
+        dup2(p[1], STDOUT_FILENO); // redirect pipe to standard output
+        close(p[1]);
         close(fd);
-        //printf("complete parent!\n");
-        printf("%s",buf);
+        printf("%s",buf); // print the processed data
+        char toPrint[bufSize];
+
+        read(STDIN_FILENO,toPrint,bufSize); // return the output of from the child
+
+        return 0;
     } else if (pid == 0) {
         //child
-        printf("hi from child\n");
-        printf("enter critical section child!\n");
+        close(p[1]);
+        dup2(p[0],STDIN_FILENO); // redirect pipe from standard input
+        close(p[0]);
 
-        dup2(p[0],STDIN_FILENO); // post
-        close(p[1]); // pre
-        close(p[0]); //post
-        //read(p[0], buf, bufSize); //pre
-        printf("the data is: %s\n", buf);
-        printf("complete child!\n");
-        //char *args[]={"tr","\"[:lower:]\"","\"[:upper:]\""}; // TODO: fix the exec.
-        execl("/usr/bin/tr","tr","[:lower:]","[:upper:]",NULL);
-        //execl("/bin/ls","ls","-l",NULL);
-        printf("the exec didn't work :(");
+        execl("/usr/bin/tr","tr","[:lower:]","[:upper:]",NULL); // execute the tr command
+        printf("the exec didn't work :("); // error message if exec fails
     } else{
         perror("fork error: ");
         return 1;
     }
-
 
     return 0;
 }
